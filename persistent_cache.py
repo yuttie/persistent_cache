@@ -36,7 +36,7 @@ def persistent_cache(func):
         os.makedirs(cache_dir, exist_ok=True)
         normalized_args = (args, tuple(sorted(kwargs.items())))
         cache_key = hashlib.sha1(pickle.dumps(normalized_args)).hexdigest()
-        cache_file = cache_key + '.pickle.zst'
+        cache_file = os.path.join(cache_dir, cache_key + '.pickle.zst')
         if os.path.isfile(cache_file):
             logger.info('Found a cache "%s"', cache_file)
             with zstd_open_read(cache_file) as f:
