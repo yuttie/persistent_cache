@@ -25,6 +25,22 @@ def zstd_open_read(path, *args, **kwargs):
             yield io.BufferedReader(decomp)
 
 
+def store_cache(value, func, *args, **kwargs):
+    logger = logging.getLogger(f'{__name__}.store_cache.{func.__name__}')
+
+    base_cache_dir = '.persistent_cache'
+    cache_dir = os.path.join(base_cache_dir, func.__module__ + '.' + func.__qualname__)
+
+    os.makedirs(cache_dir, exist_ok=True)
+    normalized_args = (args, tuple(sorted(kwargs.items())))
+    cache_key = hashlib.sha1(pickle.dumps(normalized_args)).hexdigest()
+    cache_file = os.path.join(cache_dir, cache_key + '.pickle.zst')
+
+    with zstd_open_write(cache_file, level=19, threads=-1) as f:
+        pickle.dump(value, f)
+    logger.info('Created a cache "%s"', cache_file)
+
+
 def persistent_cache(func):
     logger = logging.getLogger(f'{__name__}.persistent_cache.{func.__name__}')
 
