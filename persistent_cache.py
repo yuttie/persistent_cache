@@ -31,11 +31,11 @@ def store_cache(value, func, *args, **kwargs):
     base_cache_dir = '.persistent_cache'
     cache_dir = os.path.join(base_cache_dir, func.__module__ + '.' + func.__qualname__)
 
-    os.makedirs(cache_dir, exist_ok=True)
     normalized_args = (args, tuple(sorted(kwargs.items())))
     cache_key = hashlib.sha1(pickle.dumps(normalized_args)).hexdigest()
     cache_file = os.path.join(cache_dir, cache_key + '.pickle.zst')
 
+    os.makedirs(cache_dir, exist_ok=True)
     with zstd_open_write(cache_file, level=19, threads=-1) as f:
         pickle.dump(value, f)
     logger.info('Created a cache "%s"', cache_file)
@@ -49,7 +49,6 @@ def persistent_cache(func):
 
     @functools.wraps(func)
     def wrapper_cache(*args, **kwargs):
-        os.makedirs(cache_dir, exist_ok=True)
         normalized_args = (args, tuple(sorted(kwargs.items())))
         cache_key = hashlib.sha1(pickle.dumps(normalized_args)).hexdigest()
         cache_file = os.path.join(cache_dir, cache_key + '.pickle.zst')
@@ -61,6 +60,7 @@ def persistent_cache(func):
             logger.info('No cache found, computing the function...')
             value = func(*args, **kwargs)
             logger.info('Computation has finished')
+            os.makedirs(cache_dir, exist_ok=True)
             with zstd_open_write(cache_file, level=19, threads=-1) as f:
                 pickle.dump(value, f)
             logger.info('Created a cache "%s"', cache_file)
