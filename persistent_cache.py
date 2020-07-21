@@ -49,7 +49,7 @@ def store_cache(value, func, *args, **kwargs):
 
 
 def cache(func):
-    logger = logging.getLogger(f'{__name__}.persistent_cache.{func.__name__}')
+    logger = logging.getLogger(f'{__name__}.cache.{func.__name__}')
 
     base_cache_dir = '.persistent_cache'
     cache_dir = os.path.join(base_cache_dir, func.__module__ + '.' + func.__qualname__)
