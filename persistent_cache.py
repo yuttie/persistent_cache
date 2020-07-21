@@ -26,6 +26,9 @@ def zstd_open_read(path, *args, **kwargs):
 
 
 def _hash_args(*args, **kwargs):
+    logger = logging.getLogger(f'{__name__}._hash_args')
+    logger.debug('hash(args) = %s', hashlib.sha1(pickle.dumps(args)).hexdigest())
+    logger.debug('hash(kwargs) = %s', hashlib.sha1(pickle.dumps(tuple(sorted(kwargs.items())))).hexdigest())
     normalized_args = (args, tuple(sorted(kwargs.items())))
     return hashlib.sha1(pickle.dumps(normalized_args)).hexdigest()
 
