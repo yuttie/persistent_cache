@@ -45,7 +45,7 @@ def store_cache(value, func, *args, **kwargs):
     logger.info('Created a cache "%s"', cache_file)
 
 
-def persistent_cache(func):
+def cache(func):
     logger = logging.getLogger(f'{__name__}.persistent_cache.{func.__name__}')
 
     base_cache_dir = '.persistent_cache'

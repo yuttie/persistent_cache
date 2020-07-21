@@ -1,13 +1,13 @@
 import pytest
 
-from persistent_cache import persistent_cache, store_cache
+from persistent_cache import cache, store_cache
 
 import time
 
-def test_persistent_cache(tmpdir):
+def test_cache(tmpdir):
     tmpdir.chdir()
 
-    @persistent_cache
+    @cache
     def heavy_computation(x):
         time.sleep(1)
         return x * 2
@@ -31,7 +31,7 @@ def test_persistent_cache(tmpdir):
 def test_store_cache(tmpdir):
     tmpdir.chdir()
 
-    @persistent_cache
+    @cache
     def heavy_computation(x):
         time.sleep(1)
         return x * 2
