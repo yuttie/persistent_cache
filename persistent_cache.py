@@ -27,10 +27,10 @@ def zstd_open_read(path, *args, **kwargs):
 
 def _hash_args(*args, **kwargs):
     logger = logging.getLogger(f'{__name__}._hash_args')
-    logger.debug('hash(args) = %s', hashlib.sha1(pickle.dumps(args)).hexdigest())
-    logger.debug('hash(kwargs) = %s', hashlib.sha1(pickle.dumps(tuple(sorted(kwargs.items())))).hexdigest())
+    logger.debug('hash(args) = %s', hashlib.sha1(pickle.dumps(args, protocol=4)).hexdigest())
+    logger.debug('hash(kwargs) = %s', hashlib.sha1(pickle.dumps(tuple(sorted(kwargs.items())), protocol=4)).hexdigest())
     normalized_args = (args, tuple(sorted(kwargs.items())))
-    return hashlib.sha1(pickle.dumps(normalized_args)).hexdigest()
+    return hashlib.sha1(pickle.dumps(normalized_args, protocol=4)).hexdigest()
 
 
 def store_cache(value, func, *args, **kwargs):
@@ -44,7 +44,7 @@ def store_cache(value, func, *args, **kwargs):
 
     os.makedirs(cache_dir, exist_ok=True)
     with zstd_open_write(cache_file, level=19, threads=-1) as f:
-        pickle.dump(value, f)
+        pickle.dump(value, f, protocol=4)
     logger.info('Created a cache "%s"', cache_file)
 
 
@@ -72,7 +72,7 @@ def cache(func):
 
             os.makedirs(cache_dir, exist_ok=True)
             with zstd_open_write(cache_file, level=19, threads=-1) as f:
-                pickle.dump(value, f)
+                pickle.dump(value, f, protocol=4)
             logger.info('Created a cache "%s"', cache_file)
 
             return value
