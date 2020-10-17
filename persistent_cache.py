@@ -78,3 +78,37 @@ def cache(func):
             return value
 
     return wrapper_cache
+
+
+def numpy_cache(func):
+    import numpy as np
+
+    logger = logging.getLogger(f'{__name__}.numpy_cache.{func.__name__}')
+
+    base_cache_dir = '.persistent_cache'
+    cache_dir = os.path.join(base_cache_dir, func.__module__ + '.' + func.__qualname__)
+
+    @functools.wraps(func)
+    def wrapper_cache(*args, **kwargs):
+        cache_key = _hash_args(*args, **kwargs)
+        cache_file = os.path.join(cache_dir, cache_key + '.npy.zst')
+
+        if os.path.isfile(cache_file):
+            logger.info('Found a cache "%s"', cache_file)
+            with zstd_open_read(cache_file) as f:
+                return np.load(f)
+        else:
+            logger.info('No cache found, computing the function...')
+
+            value = func(*args, **kwargs)
+
+            logger.info('Computation has finished')
+
+            os.makedirs(cache_dir, exist_ok=True)
+            with zstd_open_write(cache_file, level=19, threads=-1) as f:
+                np.save(f, value)
+            logger.info('Created a cache "%s"', cache_file)
+
+            return value
+
+    return wrapper_cache
